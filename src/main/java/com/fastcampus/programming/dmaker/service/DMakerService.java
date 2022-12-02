@@ -13,6 +13,11 @@ import org.springframework.stereotype.Service;
 public class DMakerService {
     private final DeveloperRepository developerRepository;
 
+    // ACID:
+    // Atomic
+    // Consistency
+    // Isolation
+    // Durability
     @Transactional
     public void createDeveloper(){
         Developer developer = Developer.builder()
