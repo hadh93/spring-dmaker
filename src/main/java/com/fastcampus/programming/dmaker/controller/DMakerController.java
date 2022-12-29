@@ -1,6 +1,7 @@
 package com.fastcampus.programming.dmaker.controller;
 
 import com.fastcampus.programming.dmaker.dto.CreateDeveloper;
+import com.fastcampus.programming.dmaker.dto.DeveloperDto;
 import com.fastcampus.programming.dmaker.service.DMakerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +23,10 @@ public class DMakerController {
     private final DMakerService dMakerService;
 
     @GetMapping("/developers")
-    public List<String> getAllDevelopers() {
+    public List<DeveloperDto> getAllDevelopers() {
         // GET /developers HTTP/1.1
         log.info("GET /developers HTTP/1.1");
-        return Arrays.asList("Snow", "Elsa", "Olaf");
+        return dMakerService.getAllDevelopers();
     }
 
     @PostMapping("/create-developer")

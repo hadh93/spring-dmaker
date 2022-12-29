@@ -1,6 +1,7 @@
 package com.fastcampus.programming.dmaker.service;
 
 import com.fastcampus.programming.dmaker.dto.CreateDeveloper;
+import com.fastcampus.programming.dmaker.dto.DeveloperDto;
 import com.fastcampus.programming.dmaker.entity.Developer;
 import com.fastcampus.programming.dmaker.exception.DMakerErrorCode;
 import com.fastcampus.programming.dmaker.exception.DMakerException;
@@ -12,7 +13,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -71,4 +74,9 @@ public class DMakerService {
          */
     }
 
+    public List<DeveloperDto> getAllDevelopers() {
+        return developerRepository.findAll()
+                .stream().map(DeveloperDto::fromEntity)
+                .collect(Collectors.toList());
+    }
 }
