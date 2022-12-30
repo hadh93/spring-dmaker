@@ -1,6 +1,7 @@
 package com.fastcampus.programming.dmaker.service;
 
 import com.fastcampus.programming.dmaker.dto.CreateDeveloper;
+import com.fastcampus.programming.dmaker.dto.DeveloperDetailDto;
 import com.fastcampus.programming.dmaker.dto.DeveloperDto;
 import com.fastcampus.programming.dmaker.entity.Developer;
 import com.fastcampus.programming.dmaker.exception.DMakerErrorCode;
@@ -78,5 +79,11 @@ public class DMakerService {
         return developerRepository.findAll()
                 .stream().map(DeveloperDto::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    public DeveloperDetailDto getDeveloperDetail(String memberId) {
+        return developerRepository.findByMemberId(memberId)
+                .map(DeveloperDetailDto::fromEntity)
+                .orElseThrow( ()  -> new DMakerException(DMakerErrorCode.NO_DEVELOPER) );
     }
 }
