@@ -1,13 +1,16 @@
 package com.fastcampus.programming.dmaker.service;
 
+import com.fastcampus.programming.dmaker.code.StatusCode;
 import com.fastcampus.programming.dmaker.dto.CreateDeveloper;
 import com.fastcampus.programming.dmaker.dto.DeveloperDetailDto;
 import com.fastcampus.programming.dmaker.dto.DeveloperDto;
 import com.fastcampus.programming.dmaker.dto.EditDeveloper;
 import com.fastcampus.programming.dmaker.entity.Developer;
+import com.fastcampus.programming.dmaker.entity.RetiredDeveloper;
 import com.fastcampus.programming.dmaker.exception.DMakerErrorCode;
 import com.fastcampus.programming.dmaker.exception.DMakerException;
 import com.fastcampus.programming.dmaker.repository.DeveloperRepository;
+import com.fastcampus.programming.dmaker.repository.RetiredDeveloperRepository;
 import com.fastcampus.programming.dmaker.type.DeveloperLevel;
 import com.fastcampus.programming.dmaker.type.DeveloperSkillType;
 import jakarta.transaction.Transactional;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DMakerService {
     private final DeveloperRepository developerRepository;
+    private final RetiredDeveloperRepository retiredDeveloperRepository;
 
     // ACID:
     // Atomic
@@ -39,6 +43,7 @@ public class DMakerService {
                 .developerSkillType(request.getDeveloperSkillType())
                 .experienceYears(request.getExperienceYears())
                 .memberId(request.getMemberId())
+                .statusCode(StatusCode.EMPLOYED)
                 .name(request.getName())
                 .age(request.getAge())
                 .build();
@@ -67,8 +72,8 @@ public class DMakerService {
          */
     }
 
-    public List<DeveloperDto> getAllDevelopers() {
-        return developerRepository.findAll()
+    public List<DeveloperDto> getAllEmployedDevelopers() {
+        return developerRepository.findDevelopersByStatusCodeEquals(StatusCode.EMPLOYED)
                 .stream().map(DeveloperDto::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -114,5 +119,27 @@ public class DMakerService {
         if (developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
             throw new DMakerException(DMakerErrorCode.LEVEL_EXPERIENCE_YEARS_NOT_MATCHED);
         }
+    }
+
+    @Transactional
+    public DeveloperDetailDto deleteDeveloper(String memberId) {
+        // 1. EMPLOYED -> RETIRED
+        Developer developer = developerRepository.findByMemberId(memberId)
+                .orElseThrow( () -> new DMakerException(DMakerErrorCode.NO_DEVELOPER));
+        developer.setStatusCode(StatusCode.RETIRED);
+        // 2. save into RetiredDeveloper
+        RetiredDeveloper retiredDeveloper = RetiredDeveloper.builder()
+                .memberId(memberId)
+                .name(developer.getName())
+                .build();
+        retiredDeveloperRepository.save(retiredDeveloper);
+        return DeveloperDetailDto.fromEntity(developer);
+
+        // 이 두가지가 한번에 이루어져야 한다 (Atomic). 이것을 위해 @Transactional 을 넣는다.
+
+        // 그냥 습관적으로 Transactional을 쓰기도 함. 이유: JPA Dirty Checking
+
+
+
     }
 }
